@@ -57,4 +57,13 @@ export class BookController {
   ) {
     return this.bookService.delete(userId, bookId);
   }
+
+  @Get(':id/records')
+  @UseGuards(AuthGuard('jwt'))
+  getRecordsByBookId(
+    @GetUserId() userId: string,
+    @Param('id', ParseUUIDPipe) bookId: string
+  ) {
+    return this.bookService.getByIdAndUser(bookId, userId);
+  }
 }
