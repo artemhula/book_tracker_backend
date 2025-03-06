@@ -9,13 +9,14 @@ datasource db {
 }
 
 model user {
-  id        String    @id(map: "users_pkey") @default(uuid()) @db.Uuid
-  email     String    @unique(map: "users_email_key") @db.VarChar(255)
-  fullName  String?   @map("full_name") @db.VarChar(255)
-  avatarUrl String?   @map("avatar_url")
-  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
-  book      book[]
-  record    record[]
+  id           String    @id(map: "users_pkey") @default(uuid()) @db.Uuid
+  email        String    @unique(map: "users_email_key") @db.VarChar(255)
+  fullName     String?   @map("full_name") @db.VarChar(255)
+  avatarUrl    String?   @map("avatar_url")
+  createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  refreshToken String?   @map("refresh_token")
+  book         book[]
+  record       record[]
 
   @@map("users")
 }
