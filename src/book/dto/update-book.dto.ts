@@ -1,6 +1,5 @@
 import {
   IsInt,
-  IsNotEmpty,
   IsOptional,
   IsString,
   IsUrl,
@@ -10,8 +9,8 @@ import {
 
 export class UpdateBookDto {
   @IsString()
-  @IsNotEmpty()
   @MaxLength(100)
+  @IsOptional()
   title?: string;
 
   @IsString()
