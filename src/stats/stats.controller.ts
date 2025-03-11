@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { StatsService } from './stats.service';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUserId } from 'src/decorators/get-user-id.decorator';
@@ -9,16 +9,20 @@ export class StatsController {
 
   @Get('')
   @UseGuards(AuthGuard('jwt'))
-  async getTotalStats(@GetUserId() userId: string) {
-    return await this.statsService.getWeeklyBookStats(userId);
+  async getTotalStats(
+    @GetUserId() userId: string,
+    @Query('dayCount') dayCount: number = 7
+  ) {
+    return await this.statsService.getStats(userId, dayCount);
   }
 
   @Get(':bookId')
   @UseGuards(AuthGuard('jwt'))
   async getBookStats(
     @GetUserId() userId: string,
-    @Param('bookId') bookId: string
+    @Param('bookId') bookId: string,
+    @Query('dayCount') dayCount: number = 7
   ) {
-    return await this.statsService.getWeeklyBookStats(userId, bookId);
+    return await this.statsService.getStats(userId, dayCount, bookId);
   }
 }
