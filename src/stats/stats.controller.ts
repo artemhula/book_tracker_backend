@@ -13,7 +13,13 @@ export class StatsController {
     @GetUserId() userId: string,
     @Query('dayCount') dayCount: number = 7
   ) {
-    return await this.statsService.getStats(userId, dayCount);
+    return await this.statsService.getStatsByDays(userId, dayCount);
+  }
+
+  @Get('report')
+  @UseGuards(AuthGuard('jwt'))
+  async getReportStats(@GetUserId() userId: string) {
+    return await this.statsService.getAllStats(userId);
   }
 
   @Get(':bookId')
@@ -23,6 +29,15 @@ export class StatsController {
     @Param('bookId') bookId: string,
     @Query('dayCount') dayCount: number = 7
   ) {
-    return await this.statsService.getStats(userId, dayCount, bookId);
+    return await this.statsService.getStatsByDays(userId, dayCount, bookId);
+  }
+
+  @Get('report/:bookId')
+  @UseGuards(AuthGuard('jwt'))
+  async getBookReportStats(
+    @GetUserId() userId: string,
+    @Param('bookId') bookId: string
+  ) {
+    return await this.statsService.getAllStats(userId, bookId);
   }
 }
