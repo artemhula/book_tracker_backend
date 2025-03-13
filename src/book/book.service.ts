@@ -41,11 +41,18 @@ export class BookService {
     return book;
   }
 
-  async getAll(userId: string) {
+  async getAll(
+    userId: string,
+    limit?: number,
+    orderBy?: string,
+    order: 'asc' | 'desc' = 'asc'
+  ) {
     return await this.prisma.book.findMany({
-      where: {
-        userId,
-      },
+      where: { userId },
+      ...(orderBy && {
+        orderBy: { [orderBy]: order },
+      }),
+      ...(limit && { take: Number(limit) }),
     });
   }
 
