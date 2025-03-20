@@ -7,8 +7,8 @@ services:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/book_tracker
       PORT: 3000
       JWT_SECRET: ${JWT_SECRET}
-      FRONTEND_URL: http://localhost:5173
-      FRONTEND_URL_CALLBACK: http://localhost:5173/login/callback
+      FRONTEND_URL: ${FRONTEND_URL}
+      FRONTEND_URL_CALLBACK: ${FRONTEND_URL_CALLBACK}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
 
