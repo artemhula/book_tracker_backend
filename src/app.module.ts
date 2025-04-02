@@ -7,6 +7,7 @@ import { BookModule } from './book/book.module';
 import { UserModule } from './user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RecordModule } from './record/record.module';
+import { StatsModule } from './stats/stats.module';
 
 @Module({
   controllers: [AppController],
@@ -18,6 +19,7 @@ import { RecordModule } from './record/record.module';
     UserModule,
     PrismaModule,
     RecordModule,
+    StatsModule,
   ],
 })
 export class AppModule {}
