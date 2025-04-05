@@ -6,61 +6,101 @@ import { getDateRange } from 'src/utils/date.utils';
 export class StatsService {
   constructor(private prisma: PrismaService) {}
 
-  async getUserTotalPages(userId: string) {
-    return await this.prisma.book.aggregate({
-      _sum: {
-        currentPage: true,
-      },
-      where: {
-        userId,
-      },
-    });
-  }
-
-  async getUserBookPages(bookId: string) {
-    return await this.prisma.book.findUnique({
-      where: {
-        id: bookId,
-      },
-      select: {
-        currentPage: true,
-      },
-    });
-  }
-
-  async getStats(userId: string, dayCount: number, bookId?: string) {
-    const now = new Date();
-    const dateRange: string[] = getDateRange(now, dayCount);
-
-    const records = await this.prisma.record.findMany({
+  private async getRecordsByDateRange(
+    userId: string,
+    startDate: string,
+    endDate: Date,
+    bookId?: string
+  ) {
+    return await this.prisma.record.findMany({
       where: {
         userId,
         bookId,
         readAt: {
-          gte: new Date(dateRange[0]),
-          lte: now,
+          gte: new Date(startDate),
+          lte: endDate,
         },
       },
     });
+  }
 
-    const pagesByDays: Record<string, number> = {};
-    dateRange.forEach((date) => (pagesByDays[date] = 0));
+  private groupRecordsByDate(
+    records: any[],
+    dateRange: string[]
+  ): Record<string, number> {
+    const pagesByDate: Record<string, number> = {};
+    dateRange.forEach((date) => (pagesByDate[date] = 0));
 
     records.forEach((record) => {
       if (record.readAt) {
         const date = record.readAt.toISOString().slice(0, 10);
-        pagesByDays[date] += record.pagesRead;
+        pagesByDate[date] += record.pagesRead;
       }
     });
 
-    const totalPages = Object.values(pagesByDays).reduce(
-      (sum, pages) => sum + pages,
-      0
+    return pagesByDate;
+  }
+
+  private calculateTotalPages(pagesByDate: Record<string, number>): number {
+    return Object.values(pagesByDate).reduce((sum, pages) => sum + pages, 0);
+  }
+
+  async getStatsByDays(userId: string, dayCount: number, bookId?: string) {
+    const now = new Date();
+    const dateRange: string[] = getDateRange(now, dayCount);
+
+    const records = await this.getRecordsByDateRange(
+      userId,
+      dateRange[0],
+      now,
+      bookId
     );
+
+    const pagesPerDays: Record<string, number> = this.groupRecordsByDate(
+      records,
+      dateRange
+    );
+    const totalPages = this.calculateTotalPages(pagesPerDays);
 
     return {
       totalPages,
-      pagesByDays,
+      pagesByDays: pagesPerDays,
+    };
+  }
+
+  async getAllStats(userId: string, bookId?: string) {
+    const now = new Date();
+    const weeklyDateRange: string[] = getDateRange(now, 7);
+    const monthlyDateRange: string[] = getDateRange(now, 30);
+    const weeklyRecords = await this.getRecordsByDateRange(
+      userId,
+      weeklyDateRange[0],
+      now,
+      bookId
+    );
+    const monthlyRecords = await this.getRecordsByDateRange(
+      userId,
+      monthlyDateRange[0],
+      now,
+      bookId
+    );
+    const pagesByWeek = this.groupRecordsByDate(weeklyRecords, weeklyDateRange);
+    const pagesByMonth = this.groupRecordsByDate(
+      monthlyRecords,
+      monthlyDateRange
+    );
+    const totalWeeklyPages = this.calculateTotalPages(pagesByWeek);
+    const totalMonthlyPages = this.calculateTotalPages(pagesByMonth);
+
+    return {
+      weekly: {
+        totalPages: totalWeeklyPages,
+        pagesPerDays: pagesByWeek,
+      },
+      monthly: {
+        totalPages: totalMonthlyPages,
+        pagesPerDays: pagesByMonth,
+      },
     };
   }
 }
