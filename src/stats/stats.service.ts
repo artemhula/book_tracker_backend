@@ -1,10 +1,15 @@
 import { Injectable } from '@nestjs/common';
+import { BookService } from 'src/book/book.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { getDateRange } from 'src/utils/date.utils';
+import groupRecordsByDate from 'src/utils/stats.utils';
 
 @Injectable()
 export class StatsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private bookService: BookService
+  ) {}
 
   private async getRecordsByDateRange(
     userId: string,
@@ -24,28 +29,14 @@ export class StatsService {
     });
   }
 
-  private groupRecordsByDate(
-    records: any[],
-    dateRange: string[]
-  ): Record<string, number> {
-    const pagesByDate: Record<string, number> = {};
-    dateRange.forEach((date) => (pagesByDate[date] = 0));
-
-    records.forEach((record) => {
-      if (record.readAt) {
-        const date = record.readAt.toISOString().slice(0, 10);
-        pagesByDate[date] += record.pagesRead;
-      }
-    });
-
-    return pagesByDate;
-  }
-
   private calculateTotalPages(pagesByDate: Record<string, number>): number {
     return Object.values(pagesByDate).reduce((sum, pages) => sum + pages, 0);
   }
 
   async getStatsByDays(userId: string, dayCount: number, bookId?: string) {
+    if (bookId) {
+      await this.bookService.getByIdAndUser(bookId, userId);
+    }
     const now = new Date();
     const dateRange: string[] = getDateRange(now, dayCount);
 
@@ -56,7 +47,7 @@ export class StatsService {
       bookId
     );
 
-    const pagesPerDays: Record<string, number> = this.groupRecordsByDate(
+    const pagesPerDays: Record<string, number> = groupRecordsByDate(
       records,
       dateRange
     );
@@ -69,6 +60,9 @@ export class StatsService {
   }
 
   async getAllStats(userId: string, bookId?: string) {
+    if (bookId) {
+      await this.bookService.getByIdAndUser(bookId, userId);
+    }
     const now = new Date();
     const weeklyDateRange: string[] = getDateRange(now, 7);
     const monthlyDateRange: string[] = getDateRange(now, 30);
@@ -84,11 +78,8 @@ export class StatsService {
       now,
       bookId
     );
-    const pagesByWeek = this.groupRecordsByDate(weeklyRecords, weeklyDateRange);
-    const pagesByMonth = this.groupRecordsByDate(
-      monthlyRecords,
-      monthlyDateRange
-    );
+    const pagesByWeek = groupRecordsByDate(weeklyRecords, weeklyDateRange);
+    const pagesByMonth = groupRecordsByDate(monthlyRecords, monthlyDateRange);
     const totalWeeklyPages = this.calculateTotalPages(pagesByWeek);
     const totalMonthlyPages = this.calculateTotalPages(pagesByMonth);
 

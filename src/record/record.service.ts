@@ -41,6 +41,9 @@ export class RecordService {
   }
 
   async getByBookIdAndUser(bookId: string, userId: string) {
+    if (bookId) {
+      await this.bookService.getByIdAndUser(bookId, userId);
+    }
     return this.prisma.record.findMany({
       where: { bookId, userId },
       orderBy: { readAt: 'desc' },

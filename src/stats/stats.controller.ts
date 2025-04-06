@@ -1,7 +1,15 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+  UseGuards,
+  ValidationPipe,
+} from '@nestjs/common';
 import { StatsService } from './stats.service';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUserId } from 'src/decorators/get-user-id.decorator';
+import { GetStatsQueryDto } from './dto/get-stats-query.dto';
 
 @Controller('stats')
 export class StatsController {
@@ -11,9 +19,9 @@ export class StatsController {
   @UseGuards(AuthGuard('jwt'))
   async getTotalStats(
     @GetUserId() userId: string,
-    @Query('dayCount') dayCount: number = 7
+    @Query(new ValidationPipe({ transform: true })) query: GetStatsQueryDto
   ) {
-    return await this.statsService.getStatsByDays(userId, dayCount);
+    return await this.statsService.getStatsByDays(userId, query.dayCount ?? 7);
   }
 
   @Get('report')
@@ -27,9 +35,13 @@ export class StatsController {
   async getBookStats(
     @GetUserId() userId: string,
     @Param('bookId') bookId: string,
-    @Query('dayCount') dayCount: number = 7
+    @Query(new ValidationPipe({ transform: true })) query: GetStatsQueryDto
   ) {
-    return await this.statsService.getStatsByDays(userId, dayCount, bookId);
+    return await this.statsService.getStatsByDays(
+      userId,
+      query.dayCount ?? 7,
+      bookId
+    );
   }
 
   @Get('report/:bookId')
