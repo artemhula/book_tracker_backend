@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { JwtPayload } from './interfaces/jwt.interface';
 
 @Injectable()
 export class AuthService {
@@ -10,8 +11,8 @@ export class AuthService {
   ) {}
 
   async generateTokensAndSave(user: any) {
-    const payload = { sub: user.id, email: user.email };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const payload: JwtPayload = { sub: user.id, email: user.email };
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '30m' });
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
 
     await this.prisma.user.update({
@@ -25,7 +26,7 @@ export class AuthService {
   async refreshAccessToken(refreshToken: string) {
     try {
       const payload = this.jwtService.verify(refreshToken);
-      console.log(payload);
+      // console.log(payload);
       const user = await this.prisma.user.findUnique({
         where: { id: payload.sub },
       });
