@@ -11,7 +11,6 @@ import {
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
-import { GetUserId } from 'src/decorators/get-user-id.decorator';
 import { CreateBookDto } from './dto/create-book.dto';
 import { BookService } from './book.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -28,7 +27,8 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { BookResponseDto } from './dto/book.dto';
-import { RecordResponseDto } from 'src/record/dto/record.dto';
+import { RecordResponseDto } from '../record/dto/record.dto';
+import { GetUserId } from '../decorators/get-user-id.decorator';
 
 @ApiTags('Books')
 @Controller('book')
