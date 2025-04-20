@@ -9,6 +9,12 @@ async function start() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.use(cookieParser());
+
+  console.log(
+    `Current FRONTEND_URL from env is: "${process.env.FRONTEND_URL}"`
+  );
+  ы;
+
   app.enableCors({
     origin: [process.env.FRONTEND_URL],
     credentials: true,
