@@ -10,12 +10,8 @@ async function start() {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.use(cookieParser());
 
-  console.log(
-    `Current FRONTEND_URL from env is: "${process.env.FRONTEND_URL}"`
-  );
-
   app.enableCors({
-    origin: [process.env.FRONTEND_URL],
+    origin: ['https://booktracker-virid.vercel.app'],
     credentials: true,
   });
 
