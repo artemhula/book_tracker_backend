@@ -9,9 +9,9 @@ export class AuthService {
     private prisma: PrismaService
   ) {}
 
-  async generateJwt(user: any) {
-    const payload = { sub: user.id, username: user.name };
-    return await this.jwtService.signAsync(payload);
+  generateJwt(user: any) {
+    const payload = { sub: user.id, email: user.email };
+    return this.jwtService.sign(payload);
   }
 
   async createUser(data: {
