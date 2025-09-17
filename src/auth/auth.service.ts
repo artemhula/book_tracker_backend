@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -9,9 +9,38 @@ export class AuthService {
     private prisma: PrismaService
   ) {}
 
-  generateJwt(user: any) {
+  async generateTokensAndSave(user: any) {
     const payload = { sub: user.id, email: user.email };
-    return this.jwtService.sign(payload);
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { refreshToken },
+    });
+
+    return { accessToken, refreshToken };
+  }
+
+  async refreshAccessToken(refreshToken: string) {
+    try {
+      const payload = this.jwtService.verify(refreshToken);
+      console.log(payload);
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.sub },
+      });
+      if (!user || user.refreshToken !== refreshToken) {
+        throw new UnauthorizedException('Invalid refresh token (postgres)');
+      }
+
+      const accessToken = this.jwtService.sign(
+        { sub: payload.sub, email: payload.email },
+        { expiresIn: '15m' }
+      );
+      return { accessToken };
+    } catch {
+      throw new UnauthorizedException('Invalid refresh token (jwt)');
+    }
   }
 
   async createUser(data: {
