@@ -47,6 +47,6 @@ export class AuthController {
   @Post('logout')
   logout(@Res() res: express.Response) {
     res.clearCookie('refreshToken');
-    return { ok: true };
+    res.json({ ok: true });
   }
 }
