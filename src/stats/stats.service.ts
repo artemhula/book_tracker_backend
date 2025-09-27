@@ -28,16 +28,14 @@ export class StatsService {
     });
   }
 
-  async getWeeklyBookStats(userId: string, bookId?: string) {
+  async getStats(userId: string, dayCount: number, bookId?: string) {
     const now = new Date();
-
-    const days = 7;
-    const dateRange: string[] = getDateRange(now, days);
+    const dateRange: string[] = getDateRange(now, dayCount);
 
     const records = await this.prisma.record.findMany({
       where: {
         userId,
-        ...(bookId ? { bookId } : {}),
+        bookId,
         readAt: {
           gte: new Date(dateRange[0]),
           lte: now,
@@ -45,24 +43,24 @@ export class StatsService {
       },
     });
 
-    const pagesByDate: Record<string, number> = {};
-    dateRange.forEach((date) => (pagesByDate[date] = 0));
+    const pagesByDays: Record<string, number> = {};
+    dateRange.forEach((date) => (pagesByDays[date] = 0));
 
     records.forEach((record) => {
       if (record.readAt) {
         const date = record.readAt.toISOString().slice(0, 10);
-        pagesByDate[date] += record.pagesRead;
+        pagesByDays[date] += record.pagesRead;
       }
     });
 
-    const weeklyTotalPages = Object.values(pagesByDate).reduce(
+    const totalPages = Object.values(pagesByDays).reduce(
       (sum, pages) => sum + pages,
       0
     );
 
     return {
-      weeklyTotalPages,
-      weeklyStats: pagesByDate,
+      totalPages,
+      pagesByDays,
     };
   }
 }
