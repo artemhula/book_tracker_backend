@@ -7,13 +7,16 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
+  ValidationPipe,
 } from '@nestjs/common';
 import { GetUserId } from 'src/decorators/get-user-id.decorator';
 import { CreateBookDto } from './dto/create-book.dto';
 import { BookService } from './book.service';
 import { AuthGuard } from '@nestjs/passport';
 import { UpdateBookDto } from './dto/update-book.dto';
+import { GetBooksQueryDto } from './dto/get-books-query.dto';
 
 @Controller('book')
 export class BookController {
@@ -35,8 +38,16 @@ export class BookController {
   }
   @Get()
   @UseGuards(AuthGuard('jwt'))
-  async getAll(@GetUserId() userId: string) {
-    return await this.bookService.getAll(userId);
+  async getAll(
+    @GetUserId() userId: string,
+    @Query(new ValidationPipe({ transform: true })) query: GetBooksQueryDto
+  ) {
+    return await this.bookService.getAll(
+      userId,
+      query.limit,
+      query.orderBy,
+      query.order
+    );
   }
 
   @Patch(':id')

@@ -12,6 +12,7 @@ async function start() {
     origin: [process.env.FRONTEND_URL],
     credentials: true,
   });
+
   await app.listen(PORT, () => {
     console.log(`server is running, port: ${PORT}`);
   });
