@@ -20,7 +20,7 @@ import {
 import { StatisticDto } from './dto/statistic.dto';
 import { StatisticReportDto } from './dto/statistic-report.dto';
 
-@Controller('Statistics')
+@Controller('stats')
 export class StatsController {
   constructor(private readonly statsService: StatsService) {}
 
