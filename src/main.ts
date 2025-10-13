@@ -13,7 +13,6 @@ async function start() {
   console.log(
     `Current FRONTEND_URL from env is: "${process.env.FRONTEND_URL}"`
   );
-  ы;
 
   app.enableCors({
     origin: [process.env.FRONTEND_URL],
