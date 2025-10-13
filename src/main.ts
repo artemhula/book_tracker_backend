@@ -11,7 +11,7 @@ async function start() {
   app.use(cookieParser());
 
   app.enableCors({
-    origin: ['https://booktracker-virid.vercel.app'],
+    origin: process.env.FRONTEND_URL,
     credentials: true,
   });
 
